@@ -1,0 +1,275 @@
+{
+  "texts": {
+    "verification_gen_loop_inv": "ACSL is a specification language for C programs that conforms to the design by contract paradigm, utilizing Hoare style pre- and postconditions and invariants.You are an expert in program verification, and please generate loop invariant as C annotation comments at the infill location (annotated by \"/* @ >>> INFILL <<< */\") using ACSL language.Note that the `loop invariant` clause is a condition that is true at the beginning and end of every loop iteration.The `loop assign` is a condition that describes the set of variables modified by the loop.You cannot use functions defined in existing programs as part of the specification; focus on describing the properties.Just show me the loop invariant and don't explain it.\n",
+    "empty_context": "",
+    "gen_loop_example_1_question": "#include <stdlib.h>\n\nstatic void mbedtls_zeroize(void *v, size_t n, int q, int w) {\n\n  char *p = v;\n  int x = 1;\n  int y = 1;\n  int a = q;\n  int b = w;\n  /* @ >>> INFILL <<< */\n  for(int i=0; i<n ; i++) {\n    p[i] = 0;\n    \n    int t1 = x;\n    int t2 = y;\n    x = t1 + t2;\n    y = t1 + t2;\n\n    a--;\n    b--;\n  }\n}\n",
+    "gen_loop_example_1_answer": "loop invariant 0 <= i <= n;\nloop invariant x == y; \nloop invariant x >= 1;\nloop invariant y >= 1;\nloop invariant a - b == q - w;\nloop invariant \\forall integer j; 0 <= j < i ==> ((char*)p)[j] == 0;\nloop assigns ((char*)p)[0..n-1];\nloop assigns i;\nloop assigns a;\nloop assigns b;\nloop assigns x;\nloop assigns y;\n",
+    "gen_loop_example_2_question": "int arraymax(int* a, int* b, int n) {\n  int i = 0;\n  int max = a[0];\n  int j = n;\n  int k = n;\n\n  /* @ >>> INFILL <<< */\n  while (i < n) {\n    b[i] = b[i] * 2;\n\n    if (max < a[i])\n      max = a[i];\n    i = i + 1;\n\n    j--;\n    k--;\n  }\n  return max;\n}\n",
+    "gen_loop_example_2_answer": "loop invariant 0 <= i <= n;\nloop invariant \\forall integer k;  0 <= k < i ==> max >=  a[k];\nloop invariant \\exists integer k;  0 <= k < i &&  max == a[k];\nloop invariant \\forall integer k; p <= k < n ==> b[k] == k;\nloop invariant \\forall integer k; 0 <= k < i ==> b[k] == 2*k;\nloop invariant j == k;\nloop assigns i;\nloop assigns max;\nloop assigns a[0..n-1];\n",
+    "gen_loop_example_3_question": "#include <stdlib.h>\n#include <string.h>\n#include <stdint.h>\n\n#define SIZE 10\n\nint foo(uint32_t *map, uint32_t *key, uint32_t len)\n{\n    int ret = -1;\n    int x = 1;\n    int y = 0;\n    /* @ >>> INFILL <<< */\n    for (int i = 0; i < len; i++)\n\t  {\n\t\t    if (map[i] == key[i])\n\t\t    {\n\t\t\t      ret = 0;\n\t\t\t      break;\n\t\t    }\n        x = x + y;\n        y = y + 1;\n\t  }\n    //@ assert (x >= y) ;\n\t  return ret;\n}\n",
+    "gen_loop_example_3_answer": "loop invariant 0 <= i <= len;\nloop invariant ret == -1 || ret == 0;\nloop invariant ret == -1 ==> \\forall integer j; 0 <= j < i ==> map[j] != key[j];\nloop invariant ret == 0 ==> (\\exists integer j; 0 <= j < i && map[j] == key[j]);\nloop invariant y <= x;\nloop invariant 1 <= x;\nloop invariant 0 <= y;\nloop assigns i;\nloop assigns y;\nloop assigns x;\n",
+    "gen_loop_example_4_question": "int check_ia5_string(const u8 *buf, u32 len)\n{\n    int ret = 0;\n    u32 i;\n\n    if ((buf == NULL) || (len == 0)) {\n        ret = -X509_FILE_LINE_NUM_ERR;\n        goto out;\n    }\n    /* @ >>> INFILL <<< */\n    for (i = 0; i < len; i++) {\n        if (validate_ia5_char(buf[i]) == 0) {\n            ret = -X509_FILE_LINE_NUM_ERR;\n            goto out;\n        }\n    }\n\n    ret = 0;\n\nout:\n    return ret;\n}\n",
+    "gen_loop_example_4_answer": "loop invariant 0 <= i <= len;\nloop invariant \\forall integer k; 0 <= k < i ==> buf[k] <= 0x7f;\nloop assigns i, ret;\nloop variant len - i;\n",
+    "gen_loop_example_5_question": "void bubbleSort(int *a, int n) {\n    if (n <= 0) {return;}\n    int i, j, temp;\n\n    /* @ >>> INFILL <<< */\n    for(i=n-1; i>0; i--) {\n        /*@\n        loop invariant 0 <= j <= i < n;\n        loop invariant \\forall integer k; 0 <= k <= j ==> a[k] <= a[j];\n        loop invariant \\forall integer k; 0 <= k < i+1 <= n-1 ==> a[k] <= a[i+1];\n        loop invariant \\forall integer k; 0 <= k <= j ==> a[k] <= a[j];\n        loop invariant \\forall integer p, q; 0 <= p < i+1 == q <= n-1 ==> a[p] <= a[q];\n        loop assigns temp;\n        loop assigns j;\n        loop assigns a[0..i];\n        */\n        for(j=0; j<i; j++) {\n            if (a[j] > a[j+1]) {\n                temp = a[j];\n                a[j] = a[j+1];\n                a[j+1] = temp;\n            }\n        }\n    }\n}\n",
+    "gen_loop_example_5_answer": "loop invariant 0 <= i < n;\nloop invariant \\forall integer k; i <= k < n-1 ==> a[k] <= a[k+1];\nloop invariant \\forall integer k; 0 <= k < i+1 <= n-1 ==> a[k] <= a[i+1];\nloop assigns temp;\nloop assigns j;\nloop assigns i;\nloop assigns a[0..n-1];\n",
+    "gen_loop_example_6_question": "void Order(int *a, int n) {\n    if (n <= 0) {return;}\n    int i, j, temp;\n\n    /* @ >>> INFILL <<< */\n    for(i = n-1; i > 0; i--) {\n        /*@\n        loop invariant 0 <= j <= i < n;\n        loop invariant \\forall integer k; 0 <= k <= j ==> a[k] <= a[j];\n        loop invariant \\forall integer k; 0 <= k < i+1 <= n-1 ==> a[k] <= a[i+1];\n        loop invariant \\forall integer k; 0 <= k < i+1 <= n-1 ==> a[k] <= a[i+1];\n        loop assigns temp;\n        loop assigns j;\n        loop assigns a[0..i];\n        */\n        for(j=0; j<i; j++) {\n            if (a[j] > a[j+1]) {\n                temp = a[j];\n                a[j] = a[j+1];\n                a[j+1] = temp;\n            }\n        }\n    }\n}\n\nvoid main() {\n    int a[5] = {10, 9, 8, 7, 6};\n    Order(a, 5);\n    //@ assert \\forall int i; 0 <= i < 4 ==> a[i] <= a[i+1];\n}\n",
+    "gen_loop_example_6_answer": "loop invariant 0 <= i < n;\nloop invariant 0 <= i;\nloop invariant i < n;\nloop invariant \\forall integer k; 0 <= k < i+1 <= n-1 ==> a[k] <= a[i+1];\nloop invariant \\forall integer k; 0 <= k < i+1 <= n-1 ==> a[k] <= a[i+1];\nloop invariant \\forall integer k; 0 <= k < i+1 <= n-1 ==> a[k] <= a[i+1];\nloop invariant \\forall integer k; i <= k < n-1 ==> a[k] <= a[k+1];\nloop invariant \\forall integer k; i <= k < n-1 ==> a[k] <= a[k+1];\nloop assigns temp;\nloop assigns j;\nloop assigns i;\nloop assigns a[0..n-1];\n",
+    "verification_infill_loop_inv": "You are an expert in program verification, and please generate loop invariant as C annotation comments at the infill location (annotated by \">>> INFILL <<<\") using ACSL language.Note that the `loop invariant` clause is a condition that is true at the beginning and end of every loop iteration.I aim to generate a wider range of diverse loop invariants that differ from the ones already provided in the code.There are some annotations present below the infill location. Please provide additional annotations that differ from the existing ones.\nAttempt to utilize these formulas template to infer invariants for each variable, if applicable. For instance:\n```\nloop invariant 1 <= x;\nloop invariant x == y;\nloop invariant w == 2*x;\nloop invariant 0 < x == > y <= z;\nloop invariant z % 2 == 1 || x == y;\nloop invariant 1 <= x || 1 <= y; \nloop invariant z % 2 == 1 && x <= y;\nloop invariant w == 2 * y;\nloop invariant c == (i*(i-1))/2;\nloop invariant \\forall integer k;  0 <= k < i ==> max >=  a[k];\nloop invariant \\exists integer k;  0 <= k < i &&  max == a[k];\nloop invariant ret == 1 ==> \\forall integer k; 0<= k < BYTE_COUNT ==> ( k < j ==> a[k] == b[k] ); \nloop invariant ret == 0 ==>  a[j] != b[j];\nloop invariant \\separated(dest + (0..i-1), src + (0..count-1));\n```\n\nJust show me the loop invariant and don't explain it.\n",
+    "infill_loop_example_1_question": "#include <stdlib.h>\n\nstatic void mbedtls_zeroize(void *v, size_t n, int q, int w) {\n\n  char *p = v;\n  int x = 1;\n  int y = 1;\n  int a = q;\n  int b = w;\n  /*@\n  >>> INFILL <<<\n  loop invariant 0 <= i <= n;\n  loop assigns i;\n  loop assigns a;\n  loop assigns b;\n  loop assigns x;\n  loop assigns y;\n  */\n  for(int i=0; i<n ; i++) {\n    p[i] = 0;\n    \n    int t1 = x;\n    int t2 = y;\n    x = t1 + t2;\n    y = t1 + t2;\n\n    a--;\n    b--;\n  }\n}\n",
+    "infill_loop_example_1_answer": "loop invariant x == y; \nloop invariant x >= 1;\nloop invariant y >= 1;\nloop invariant a - b == q - w;\nloop invariant \\forall integer j; 0 <= j < i ==> ((char*)p)[j] == 0;\nloop assigns ((char*)p)[0..n-1];\n",
+    "infill_loop_example_2_question": "int arraymax(int* a, int* b, int n) {\n  int i = 0;\n  int max = a[0];\n  int j = n;\n  int k = n;\n\n  /*@\n  >>> INFILL <<<\n  loop assigns i;\n  loop assigns max;\n  loop assigns a[0..n-1];\n  */\n  while (i < n) {\n    b[i] = b[i] * 2;\n\n    if (max < a[i])\n      max = a[i];\n    i = i + 1;\n\n    j--;\n    k--;\n  }\n  return max;\n}\n",
+    "infill_loop_example_2_answer": "loop invariant 0 <= i <= n;\nloop invariant \\forall integer k;  0 <= k < i ==> max >=  a[k];\nloop invariant \\exists integer k;  0 <= k < i &&  max == a[k];\nloop invariant \\forall integer k; p <= k < n ==> b[k] == k;\nloop invariant \\forall integer k; 0 <= k < i ==> b[k] == 2*k;\nloop invariant j == k;\n",
+    "infill_loop_example_3_question": "int fun(int n) {\n    int i = 7;\n    int x = 1;\n\n    /*@\n    >>> INFILL <<<\n    loop assigns i, x;\n    */\n    while(i <= n) {\n        x += 1;\n        i += 3;\n    }\n    return x;\n}\nint main() {\n    int a = fun(10);\n    //@ assert a == 3;\n}\n",
+    "infill_loop_example_3_answer": "loop invariant i == 4 + 3*x;\nloop invariant i <= n +3;\n",
+    "infill_loop_example_4_question": "typedef unsigned int U32;\n\n#define ONE_BYTE 16\n#define BYTE_COUNT 1\n\nint isMatch(const U32 *pTmpbits, const U32 *bits)\n{\n    int ret = 1;\n\n    /*@\n    >>> INFILL <<<\n    loop invariant 0 <= j <= BYTE_COUNT;\n    loop invariant ret == 1 || ret == 0;\n    loop assigns j;\n    */\n    for (int j = 0; j < BYTE_COUNT; ++j) \n    {\n        if (pTmpbits[j] != bits[j])\n        {\n            ret = 0;\n            break;\n        }\n    }\n    return ret;\n}\n",
+    "infill_loop_example_4_answer": "loop invariant ret == 1 ==> \\forall integer k; 0<= k < BYTE_COUNT ==> ( k < j ==> pTmpbits[k] == bits[k] ); \nloop invariant ret == 0 ==>  pTmpbits[j] != bits[j];\n",
+    "infill_loop_example_5_question": "#include <assert.h>\nint unknown();\n\nint main()\n{\n\tint i = 1;\n\tint j = 0;\n\tint z = i - j;\n\tint x = 0;\n\tint y = 0;\n\tint w = 0;\n\n  /*@\n  >>> INFILL <<<\n  loop assigns x;\n  loop assigns y;\n  loop assigns w;\n  loop assigns z;\n  */\n\twhile(unknown()) \n\t{\n\t\tz += x + y + w;\n\t\ty++;\n\t\tif (z % 2 == 1) \n\t\t  x++;\n\t\tw += 2; \n\t}\n\n\t// @ assert x==y;\n}\n",
+    "infill_loop_example_5_answer": "loop invariant x == y;\nloop invariant z % 2 == 1;\nloop invariant w == 2*y;\nloop invariant 0 <= y <= x;\n",
+    "infill_loop_example_6_question": "void Order(int *a, int n) {\n    if (n <= 0) {return;}\n    int i, j, temp;\n\n    /* @ \n    >>> INFILL <<< \n    loop assigns temp;\n    loop assigns j;\n    loop assigns i;\n    loop assigns a[0..n-1];\n    */\n    for(i = n-1; i > 0; i--) {\n        /*@\n        loop invariant 0 <= j <= i < n;\n        loop invariant \\forall integer k; 0 <= k <= j ==> a[k] <= a[j];\n        loop invariant \\forall integer k; 0 <= k < i+1 <= n-1 ==> a[k] <= a[i+1];\n        loop invariant \\forall integer k; 0 <= k < i+1 <= n-1 ==> a[k] <= a[i+1];\n        loop assigns temp;\n        loop assigns j;\n        loop assigns a[0..i];\n        */\n        for(j=0; j<i; j++) {\n            if (a[j] > a[j+1]) {\n                temp = a[j];\n                a[j] = a[j+1];\n                a[j+1] = temp;\n            }\n        }\n    }\n}\n\nvoid main() {\n    int a[5] = {10, 9, 8, 7, 6};\n    Order(a, 5);\n    //@ assert \\forall int i; 0 <= i < 4 ==> a[i] <= a[i+1];\n}\n",
+    "infill_loop_example_6_answer": "loop invariant 0 <= i < n;\nloop invariant 0 <= i;\nloop invariant i < n;\nloop invariant \\forall integer k; 0 <= k < i+1 <= n-1 ==> a[k] <= a[i+1];\nloop invariant \\forall integer k; 0 <= k < i+1 <= n-1 ==> a[k] <= a[i+1];\nloop invariant \\forall integer k; 0 <= k < i+1 <= n-1 ==> a[k] <= a[i+1];\nloop invariant \\forall integer k; i <= k < n-1 ==> a[k] <= a[k+1];\nloop invariant \\forall integer k; i <= k < n-1 ==> a[k] <= a[k+1];\n",
+    "verification_gen_contract": "ACSL is a specification language for C programs that conforms to the design by contract paradigm, utilizing Hoare style pre- and postconditions and invariants.You are an expert in program verification, and please generate function contract as C annotation comments at the infill location (annotated by \"/* @ >>> INFILL <<< */\") using ACSL language.The pre- and post-conditions of functions are written as `requires` and `ensures` clauses, respectively.The memory locations that can be modified within a function call can be specified with an `assigns` annotation (usually known as frame condition)The return value of a function can be accessed (in particular in the function's post-condition) with the `\\result` clause.\nJust show me the code and don't explain it.\n",
+    "gen_contract_example_1_question": "#include <limits.h>\n\n/* @ >>> INFILL <<< */\nint abs(int val) {\n    if(val < 0) return -val;\n    return val;\n}\n\nvoid foo(int a) {\n    int b = abs(-42);\n    //@ assert b == 42;\n    int c = abs(42);\n    //@ assert c == 42;\n    int d = abs(a);\n    int e = abs(INT_MIN);\n}\n",
+    "gen_contract_example_1_answer": "requires INT_MIN < val <= INT_MAX;    \nensures \\result >= 0;\nensures val >= 0 ==> \\result == val;\nensures val < 0 ==> \\result == -val;\n",
+    "gen_contract_example_2_question": "/* @ >>> INFILL <<< */\nvoid bubbleSort(int *a, int n) {\n    if (n <= 0) {return;}\n    int i, j, temp;\n\n    /*@\n    loop invariant 0 <= i < n;\n    loop invariant \\forall integer k; i <= k < n-1 ==> a[k] <= a[k+1];\n    loop invariant \\forall integer k; 0 <= k < i+1 <= n-1 ==> a[k] <= a[i+1];\n    loop assigns temp;\n    loop assigns j;\n    loop assigns i;\n    loop assigns a[0..n-1];\n    */\n    for(i=n-1; i>0; i--) {\n        /*@\n        loop invariant 0 <= j <= i < n;\n        loop invariant \\forall integer k; 0 <= k <= j ==> a[k] <= a[j];\n        loop invariant \\forall integer k; 0 <= k < i+1 <= n-1 ==> a[k] <= a[i+1];\n        loop invariant \\forall integer k; 0 <= k <= j ==> a[k] <= a[j];\n        loop invariant \\forall integer p, q; 0 <= p < i+1 == q <= n-1 ==> a[p] <= a[q];\n        loop assigns temp;\n        loop assigns j;\n        loop assigns a[0..i];\n        */\n        for(j=0; j<i; j++) {\n            if (a[j] > a[j+1]) {\n                temp = a[j];\n                a[j] = a[j+1];\n                a[j+1] = temp;\n            }\n        }\n    }\n}\n",
+    "gen_contract_example_2_answer": "requires \\valid(a+(0..n-1));\nrequires n > 0;\nensures \\forall integer i; 0 <= i < n-1 ==> a[i] <= a[i+1];\n",
+    "gen_contract_example_3_question": "#include <string.h>\n#include <stdint.h>\n#include <assert.h>\n\n#define SIZE 10\n\n/* @ >>> INFILL <<< */\nint foo(uint32_t *map, uint32_t *key, uint32_t len)\n{\n\tint ret = -1;\n    /*@\n    loop invariant 0 <= i <= len;\n    loop invariant ret == -1 || ret == 0;\n\tloop invariant ret == -1 ==> \\forall integer j; 0 <= j < len ==> (j < i ==> map[j] != key[j]);\n\tloop invariant ret == 0 ==> map[i] == key[i];\n    loop assigns i;\n\t*/\n\tfor (int i = 0; i < len; i++)\n\t{\n\t\tif (map[i] == key[i])\n\t\t{\n\t\t\tret = 0;\n\t\t\tbreak;\n\t\t}\n\t}\n\treturn ret;\n}\n\nint main()\n{\n    uint32_t *map = malloc(sizeof(uint32_t)*SIZE);\n\tuint32_t *key = malloc(sizeof(uint32_t)*SIZE);\n    memset(map, 0, sizeof(uint32_t)*SIZE);\n\tmemset(key, 0, sizeof(uint32_t)*SIZE);\n    key[0] = 1;\n\tmap[0] = 2;\n\n    int ret;\n    for (int i = 1; i < SIZE; i++) {\n        ret = foo(map, key, i);\n    }\n    //@ assert ret == 0;\n    //@ assert ret == -1;\n}\n",
+    "gen_contract_example_3_answer": "requires \\valid((uint32_t *)(map+(0..len-1)));\nrequires \\valid((uint32_t *)(key+(0..len-1)));\nrequires len <= SIZE;\nensures \\result == -1 ==> \\forall integer i; 0 <= i < len ==> map[i] != key[i];\nensures \\result == 0 ==> \\exists integer i; 0 <= i < len && map[i] == key[i];\nassigns \\nothing;\n",
+    "gen_contract_example_4_question": "#include <stdint.h>\n#include <stddef.h>\n\n/* @ >>> INFILL <<< */\nint sep(char* dest, const char* src, size_t count) {\n    /*@\n    loop invariant 0 <= i <= count;\n    loop invariant \\separated(dest + (0..i-1), src + (0..count-1));\n    loop assigns i;\n    */\n    for (size_t i = 0; i < count; ++i) {\n        /*@\n            loop invariant 0 <= j <= count;\n            loop invariant \\separated(dest + i, src + (0..j-1));\n            loop assigns j;\n        */\n        for (size_t j = 0; j < count; ++j) {\n            if (dest + i == (char*)(src+j)) return 0;\n        }\n    }\n    return 1;\n}\n",
+    "gen_contract_example_4_answer": "ensures \\result <==> \\separated(dest + (0..count-1), src + (0..count-1));\nassigns \\nothing;\n",
+    "gen_contract_example_5_question": "#include <stdio.h>\n\n/* @ >>> INFILL <<< */\nint fun(int n) {\n    int i = 7;\n    int x = 1;\n\n    /*@\n        loop invariant i == 4 + 3*x;\n        loop invariant i <= n +3;\n        loop assigns i, x;\n    */\n    while(i <= n) {\n        x += 1;\n        i += 3;\n    }\n    return x;\n}\n\nint main() {\n    int a = fun(10);\n    //@ assert a == 3;\n}\n",
+    "gen_contract_example_5_answer": "requires n >= 7;\nensures \\result == (n-1)/3;\nassigns \\nothing;\n",
+    "gen_contract_example_6_question": "#include <stdio.h>\n\n/* @ >>> INFILL <<< */\nint func(int c) {\n    int x = c;\n    int y = 0;\n    /*@\n    loop invariant c == x + y;\n\tloop invariant c < 0 ==> x < 0;\n\tloop invariant x >= 0 || x == c;\n    loop assigns x, y;\n    */\n    while(x > 0) {\n        x = x - 1;\n        y = y + 1;\n    }\n    return y;\n}\n\nvoid main() {\n    int t = func(5);\n    //@ assert t == 5;\n    int b = func(-1);\n    //@ assert b == 0;\n}\n",
+    "gen_contract_example_6_answer": "ensures c > 0 ==> \\result == c;\nensures c == 0 ==> \\result == 0;\nensures c < 0 ==> \\result == 0;\nensures \\result == 0 ==> c <= 0;\nassigns \\nothing;\n",
+    "verification_positioning_only": "# Task Description\nAs an expert in program verification, you utilize ACSL (ANSI/ISO-C Specification Language) to verify C code.ACSL is a specification language for C programs that conforms to the design by contract paradigm, utilizing Hoare style pre- and postconditions and invariants.You only need to include ACSL contract as C annotation comments in the original C program that I will provide, except for the main function.Just show me the code and don't explain it.\n",
+    "infill_contract_example_1_question": "#include <limits.h>\n\n/* @ >>> INFILL <<< */\nint fun(int n) {\n    int i = 7;\n    int x = 1;\n\n    /*@\n        loop invariant i == 4 + 3*x;\n        loop invariant i <= n +3;\n        loop assigns i, x;\n    */\n    while(i <= n) {\n        x += 1;\n        i += 3;\n    }\n    return x;\n}\n",
+    "infill_contract_example_1_answer": "/*@    requires n >= 7;\n    ensures \\result == (n-1)/3;\n    assigns \\nothing;\n",
+    "infill_contract_example_2_question": "#include <stdio.h>\n#include <stdlib.h>\n\n/* @ >>> INFILL <<< */\nstatic void mbedtls_zeroize(void *v, size_t n) {\n\n  char *p = v;\n  /*@\n    loop invariant 0 <= i <= n;\n    loop invariant \\forall integer j; 0 <= j < i ==> ((char*)p)[j] == 0;\n    loop assigns ((char*)p)[0..n-1];\n    loop assigns i;\n  */\n  for(int i=0; i<n ; i++)\n    p[i] = 0;\n}\n",
+    "infill_contract_example_2_answer": "requires \\valid((char *)(v+(0..n-1)));\nrequires n > 0;\nassigns ((char*)v)[0..n - 1];\nensures \\forall integer i; 0 <= i < n ==> ((char*)v)[i] == 0;\n"
+  },
+  "profiles": {
+    "loopinv_gen": [
+      {
+        "role": "system",
+        "text": "verification_gen_loop_inv"
+      },
+      {
+        "role": "system",
+        "text": "empty_context"
+      },
+      {
+        "role": "user",
+        "text": "gen_loop_example_1_question"
+      },
+      {
+        "role": "assistant",
+        "text": "gen_loop_example_1_answer"
+      },
+      {
+        "role": "user",
+        "text": "gen_loop_example_2_question"
+      },
+      {
+        "role": "assistant",
+        "text": "gen_loop_example_2_answer"
+      },
+      {
+        "role": "user",
+        "text": "gen_loop_example_3_question"
+      },
+      {
+        "role": "assistant",
+        "text": "gen_loop_example_3_answer"
+      },
+      {
+        "role": "user",
+        "text": "gen_loop_example_4_question"
+      },
+      {
+        "role": "assistant",
+        "text": "gen_loop_example_4_answer"
+      },
+      {
+        "role": "user",
+        "text": "gen_loop_example_5_question"
+      },
+      {
+        "role": "assistant",
+        "text": "gen_loop_example_5_answer"
+      },
+      {
+        "role": "user",
+        "text": "gen_loop_example_6_question"
+      },
+      {
+        "role": "assistant",
+        "text": "gen_loop_example_6_answer"
+      }
+    ],
+    "loopinv_infill": [
+      {
+        "role": "system",
+        "text": "verification_infill_loop_inv"
+      },
+      {
+        "role": "user",
+        "text": "infill_loop_example_1_question"
+      },
+      {
+        "role": "assistant",
+        "text": "infill_loop_example_1_answer"
+      },
+      {
+        "role": "user",
+        "text": "infill_loop_example_2_question"
+      },
+      {
+        "role": "assistant",
+        "text": "infill_loop_example_2_answer"
+      },
+      {
+        "role": "user",
+        "text": "infill_loop_example_3_question"
+      },
+      {
+        "role": "assistant",
+        "text": "infill_loop_example_3_answer"
+      },
+      {
+        "role": "user",
+        "text": "infill_loop_example_4_question"
+      },
+      {
+        "role": "assistant",
+        "text": "infill_loop_example_4_answer"
+      },
+      {
+        "role": "user",
+        "text": "infill_loop_example_5_question"
+      },
+      {
+        "role": "assistant",
+        "text": "infill_loop_example_5_answer"
+      },
+      {
+        "role": "user",
+        "text": "infill_loop_example_6_question"
+      },
+      {
+        "role": "assistant",
+        "text": "infill_loop_example_6_answer"
+      }
+    ],
+    "contract_gen": [
+      {
+        "role": "system",
+        "text": "verification_gen_contract"
+      },
+      {
+        "role": "system",
+        "text": "empty_context"
+      },
+      {
+        "role": "user",
+        "text": "gen_contract_example_1_question"
+      },
+      {
+        "role": "assistant",
+        "text": "gen_contract_example_1_answer"
+      },
+      {
+        "role": "user",
+        "text": "gen_contract_example_2_question"
+      },
+      {
+        "role": "assistant",
+        "text": "gen_contract_example_2_answer"
+      },
+      {
+        "role": "user",
+        "text": "gen_contract_example_3_question"
+      },
+      {
+        "role": "assistant",
+        "text": "gen_contract_example_3_answer"
+      },
+      {
+        "role": "user",
+        "text": "gen_contract_example_4_question"
+      },
+      {
+        "role": "assistant",
+        "text": "gen_contract_example_4_answer"
+      },
+      {
+        "role": "user",
+        "text": "gen_contract_example_5_question"
+      },
+      {
+        "role": "assistant",
+        "text": "gen_contract_example_5_answer"
+      },
+      {
+        "role": "user",
+        "text": "gen_contract_example_6_question"
+      },
+      {
+        "role": "assistant",
+        "text": "gen_contract_example_6_answer"
+      }
+    ],
+    "contract_infill": [
+      {
+        "role": "system",
+        "text": "verification_positioning_only"
+      },
+      {
+        "role": "user",
+        "text": "infill_contract_example_1_question"
+      },
+      {
+        "role": "assistant",
+        "text": "infill_contract_example_1_answer"
+      },
+      {
+        "role": "user",
+        "text": "infill_contract_example_2_question"
+      },
+      {
+        "role": "assistant",
+        "text": "infill_contract_example_2_answer"
+      },
+      {
+        "role": "user",
+        "text": "gen_contract_example_3_question"
+      },
+      {
+        "role": "assistant",
+        "text": "gen_contract_example_3_answer"
+      },
+      {
+        "role": "user",
+        "text": "gen_contract_example_4_question"
+      },
+      {
+        "role": "assistant",
+        "text": "gen_contract_example_4_answer"
+      },
+      {
+        "role": "user",
+        "text": "gen_contract_example_5_question"
+      },
+      {
+        "role": "assistant",
+        "text": "gen_contract_example_5_answer"
+      },
+      {
+        "role": "user",
+        "text": "gen_contract_example_6_question"
+      },
+      {
+        "role": "assistant",
+        "text": "gen_contract_example_6_answer"
+      }
+    ]
+  }
+}

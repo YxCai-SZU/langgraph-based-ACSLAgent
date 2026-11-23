@@ -1,0 +1,106 @@
+{
+  "original_root": "C:/Users/yuxing cai/Desktop/ACSLAgent-FB4C/ACSLAgent-FB4C",
+  "purpose": "Unmodified original native analyzer and provenance; no source rebuild claimed",
+  "files": [
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/bin/veri-clang",
+      "sha256": "27f926a8a4d0a48d3e8e0ee6d8b9cbec83cdf759ab7dd00f8c054ae5e71cc83f",
+      "original_file": "LLM4Veri/llvm/bin/veri-clang"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/lib/veri-llvm-pass.so",
+      "sha256": "c9793da895c92159638d753becc3d7859b9531ed88f86ef79e600a4ef6c9bc56",
+      "original_file": "LLM4Veri/llvm/lib/veri-llvm-pass.so"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/scripts/requires/get_llvm.sh",
+      "sha256": "966a494518856181c0a08044c91ca495f4dafa93d18b46437b7e79c66d1d9de4",
+      "original_file": "LLM4Veri/scripts/requires/get_llvm.sh"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/llvm-pass/CMakeLists.txt",
+      "sha256": "03df4e0614c97fd9788dedbabd18799eae226476f8940c2604740fd805d4582c",
+      "original_file": "LLM4Veri/llvm/llvm-pass/CMakeLists.txt"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/llvm-pass/src/CMakeLists.txt",
+      "sha256": "99491340c7921f43f82d27f5e80fc7c18ec64e878f77cabbce39a6eef00df344",
+      "original_file": "LLM4Veri/llvm/llvm-pass/src/CMakeLists.txt"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/llvm-pass/src/alloc-inl.h",
+      "sha256": "bc6447b79d02031d35f39a1a162b149c52f7b0d1d4dd49f884b78d4effc94b98",
+      "original_file": "LLM4Veri/llvm/llvm-pass/src/alloc-inl.h"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/llvm-pass/src/CallGraph.cpp",
+      "sha256": "3baa724072b80e0d8607baf5d6628566eff72e0d6a3656f57cf085459d11a378",
+      "original_file": "LLM4Veri/llvm/llvm-pass/src/CallGraph.cpp"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/llvm-pass/src/config.h",
+      "sha256": "ce7613aa52fde5d4b84505ebc737a1dc8e4a981d2a2d560f923466fa7dce089b",
+      "original_file": "LLM4Veri/llvm/llvm-pass/src/config.h"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/llvm-pass/src/debug.h",
+      "sha256": "89f10886c3562f96851625b9950b8441ec896bf049d4b0ca25b7b22a10ddae45",
+      "original_file": "LLM4Veri/llvm/llvm-pass/src/debug.h"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/llvm-pass/src/Graph.cpp",
+      "sha256": "aff54e03d0b0d04cb7d1dbf6791e2fcca8692157e2f258fec1172ba49835fe08",
+      "original_file": "LLM4Veri/llvm/llvm-pass/src/Graph.cpp"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/llvm-pass/src/Graph.h",
+      "sha256": "c58f85bed12d5be20b5f5dc6e3f8c7b63cc4cdce1b2f5f7aa6316c801a0e4fb9",
+      "original_file": "LLM4Veri/llvm/llvm-pass/src/Graph.h"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/llvm-pass/src/PointerAnalysis.cpp",
+      "sha256": "f0b7da29c76a1e309fa54e8d44f9361b0c4475dde95c8d4b9835c1928f23282a",
+      "original_file": "LLM4Veri/llvm/llvm-pass/src/PointerAnalysis.cpp"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/llvm-pass/src/PointerAnalysis.h",
+      "sha256": "8279df6c8d899dea30ca1747dbacd1b0503d18405d0e55578822d50aa5b1e6d9",
+      "original_file": "LLM4Veri/llvm/llvm-pass/src/PointerAnalysis.h"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/llvm-pass/src/types.h",
+      "sha256": "2c5177aa2ef79d9475c62d2b61db2c7c14c47ffb97d43b31b2f1e800b6058db2",
+      "original_file": "LLM4Veri/llvm/llvm-pass/src/types.h"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/veri-clang/src/.gitignore",
+      "sha256": "3ec9c0ff0e2998c16f0378da5903f01057abadcd18fcf01202ea0ee525053de3",
+      "original_file": "LLM4Veri/llvm/veri-clang/src/.gitignore"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/veri-clang/src/alloc-inl.h",
+      "sha256": "5de554b01752c5918763f80b0df76562354f920125ab9d287ecb511b9f3d7b0a",
+      "original_file": "LLM4Veri/llvm/veri-clang/src/alloc-inl.h"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/veri-clang/src/config.h",
+      "sha256": "d57d8a551ac91bf0bd605278d1130f9b012acfcb13b7c77ab5429b355c9d596a",
+      "original_file": "LLM4Veri/llvm/veri-clang/src/config.h"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/veri-clang/src/debug.h",
+      "sha256": "89f10886c3562f96851625b9950b8441ec896bf049d4b0ca25b7b22a10ddae45",
+      "original_file": "LLM4Veri/llvm/veri-clang/src/debug.h"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/veri-clang/src/types.h",
+      "sha256": "2c5177aa2ef79d9475c62d2b61db2c7c14c47ffb97d43b31b2f1e800b6058db2",
+      "original_file": "LLM4Veri/llvm/veri-clang/src/types.h"
+    },
+    {
+      "vendored_file": "vendor/acslagent/LLM4Veri/llvm/veri-clang/src/veri-clang.c",
+      "sha256": "8f59ecdd471e9e0365b8ed7c62e9a1604690085fd17cb49fb98765a1a2272106",
+      "original_file": "LLM4Veri/llvm/veri-clang/src/veri-clang.c"
+    }
+  ]
+}
