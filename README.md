@@ -47,7 +47,7 @@ Export your API key (name matches the `api_key_env` field in
 `config/models_config.yaml` for the model you pick):
 
 ```bat
-set "aliyun_API_KEY=sk-…"
+export aliyun_API_KEY=sk-…
 ```
 
 ## Run
