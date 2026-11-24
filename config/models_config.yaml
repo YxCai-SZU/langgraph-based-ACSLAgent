@@ -18,7 +18,8 @@ ConfigTemplates:
   aliyun_Config:
     platform: "aliyun"
     api_key_env: "aliyun_API_KEY"
-    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    # base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    base_url: "https://token-plan.maas.qianwenaiapi.com/compatible-mode/v1"
     timeout: 300
     # timeout是指单次query拿到结果的最长等待时间，单位秒
 
@@ -41,14 +42,32 @@ ConfigTemplates:
 # =================================================================
 ModelMap:
 
+  "kimi-k3.1-pro":
+      template_id: "aliyun_Config"
+      timeout: 120
+      max_tokens: 4096
+      omit_parameters: [temperature, top_p, frequency_penalty, presence_penalty, stop]
+
+  "qwen3.8-omni-flash":
+      template_id: "aliyun_Config"
+      timeout: 120
+      max_tokens: 4096
+
+  "glm-5.3":
+    template_id: "aliyun_Config"
+
   "qwen4-max":
     template_id: "aliyun_Config"
 
   "deepseek-v4.1-flash":
     template_id: "aliyun_Config"
+    timeout: 120
+    max_tokens: 4096
 
   "qwen3.8-flash":
       template_id: "aliyun_Config"
+      timeout: 120
+      max_tokens: 4096
 
   "qwen3.8-max":
       template_id: "aliyun_Config"

@@ -62,16 +62,18 @@ class FramacOutcome:
     stderr_path: str = ""
     seconds: float = 0.0
     process_timed_out: bool = False
+    returncode: int | None = None
+    goals: tuple[dict, ...] = ()
 
     @property
     def passed(self) -> bool:
-        """The FB4C control-flow pass rule, including requires timeouts."""
-        return self.upstream_passed
+        """Improve uses strict partial-correctness success."""
+        return self.strict_passed
 
     @property
     def strict_passed(self) -> bool:
-        """Diagnostic only: does not change FB4C control flow."""
-        return self.verdict == "pass" and self.proved == self.total
+        """No timeouts, no missing results, and at least one obligation."""
+        return self.verdict == "pass" and self.proved == self.total and self.total > 0
 
     @property
     def result_type(self) -> str:
@@ -102,6 +104,8 @@ class FramacOutcome:
             "stderr_path": self.stderr_path,
             "seconds": self.seconds,
             "process_timed_out": self.process_timed_out,
+            "returncode": self.returncode,
+            "goals": list(self.goals),
         }
         if compact:
             for key in ('command', 'stdout_path', 'stderr_path', 'seconds', 'upstream_passed'):
@@ -118,6 +122,8 @@ class RunState(TypedDict, total=False):
     model_config: str
     analyzer_config: str
     frama_c: str
+    candidate_count: int
+    fmparallel: int
     max_retries: int
     max_repairs: int | None
     max_rounds: int
@@ -174,3 +180,18 @@ class RunState(TypedDict, total=False):
     max_pass_goal: int
     last_completed_task_id: int
     final_outcome: FramacOutcome
+    ledger: dict
+    batch: list
+    batch_mode: str
+    retry_reason: str
+    initial_complete: bool
+    local_evaluation: dict
+    full_evaluation: dict
+    failed_goals: list
+    score_drop_threshold: float
+    source_scopes: list
+    verification_number: int
+    model_calls: int
+    prompt_tokens: int
+    progress: bool
+    wp_cache: str

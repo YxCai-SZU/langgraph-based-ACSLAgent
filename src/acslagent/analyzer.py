@@ -16,6 +16,7 @@ Reference: LLM4Veri/mark.py:RunClangCommand, GetSpecLoc.
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -35,7 +36,8 @@ class AnalyzerError(RuntimeError):
 class AnalyzerConfig:
     """Where the vendored veri-clang lives.
 
-    All paths are Linux paths. On Linux or inside WSL the analyzer is run
+    Relative paths resolve against the configuration file's directory.
+    Absolute paths remain supported. On Linux or inside WSL the analyzer is run
     directly. Only when this Python process runs on Windows is the command
     forwarded through `wsl.exe -d <distribution>`.
     """
@@ -52,7 +54,13 @@ class AnalyzerConfig:
         path = Path(path)
         if not path.is_file():
             raise AnalyzerError(f"{path} is missing; run scripts/setup_native.py first")
-        raw = json.loads(path.read_text(encoding="utf-8"))
+        raw = json.loads(path.read_text(encoding="utf-8-sig"))
+        for key in ('analyzer_root', 'compiler_directory', 'library_path'):
+            value = raw.get(key)
+            if value and not value.startswith('/') and not Path(value).is_absolute():
+                resolved = (path.resolve().parent/value).resolve()
+                raw[key] = (_wsl_path(resolved, raw.get('distribution', 'Ubuntu'))
+                            if sys.platform == 'win32' else str(resolved))
         known = {k: v for k, v in raw.items() if k in cls.__dataclass_fields__}
         return cls(**known)
 
@@ -164,7 +172,9 @@ def run_veri_clang(
         "stderr": str(work_dir / "veri-clang.stderr.txt"),
     }
     if completed.returncode != 0:
-        detail = (stderr or stdout).strip().splitlines()[-5:]
+        lines = (stderr or stdout).strip().splitlines()
+        detail = [line for line in lines if re.search(r'warning:|error:|Running pass|Segmentation|isIntrinsic', line)][:6]
+        detail = detail or lines[-5:]
         raise AnalyzerError(
             f"veri-clang exited with {completed.returncode}: "
             + " | ".join(detail)

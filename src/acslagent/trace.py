@@ -3,11 +3,13 @@
 seq orders events; task_id/round/iteration/step/choice identify the task.
 Repeated source/stdout/stderr payloads use <field>_ref: <seq>, referring to an
 earlier event's detail.<field>. read_trace(resolve_refs=True) expands them.
-No wall-clock timestamps, command paths or duplicate snapshot files are needed.
+Verifier events include commands and the loaded verifier module for auditing.
+UTC timestamps and measured durations allow timing attribution without file-mtime estimates.
 """
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -88,7 +90,8 @@ class Tracer:
                     detail[name + '_ref'] = prior[1]
                 else:
                     updates[name] = (detail[name], sequence)
-            record = dict(seq=sequence, node=node, event=event, task_id=task_id,
+            record = dict(seq=sequence, timestamp=datetime.now(timezone.utc).isoformat(),
+                          node=node, event=event, task_id=task_id,
                           round=round_number, iteration=iteration_number,
                           step=step, choice=choice, detail=detail)
             with self.path.open('a', encoding='utf-8') as stream:

@@ -22,7 +22,7 @@ def main():
     parser.add_argument('--run-id',default='count_replay_fixed')
     parser.add_argument('--output',default='runs')
     parser.add_argument('--retries',type=cli.retry_budget,default=graph.MAX_RETRIES,
-                        help='FB4C outer-loop attempts, including the first (default 5)')
+                        help='additional regeneration batches per subtask (initial batch is free)')
     parser.add_argument('--repairs',type=cli.repair_budget,default=graph.MAX_REPAIRS)
     parser.add_argument('--frama-c',default='frama-c')
     parser.add_argument('--analyzer-config',default='.tools/native.json')
@@ -31,19 +31,16 @@ def main():
     # order instead of overwriting all but the last reply under (round, task).
     replies=defaultdict(deque)
     for event in read_trace(args.recorded_run):
-        if event['node']=='generate' and event['event']=='reply':
-            replies[(event['round'],event['task_id'])].append(event['detail'])
+        if event['node'] in ('generate', 'fix') and event['event']=='reply':
+            replies[(event['detail']['phase'],event['task_id'])].append(event['detail'])
     run_dir=Path(args.output)/args.run_id
     def ask(config,messages,temperature,*,attempts):
-        request=next(e for e in reversed(read_trace(run_dir)) if e['node']=='generate' and e['event']=='request')
-        key=(request['round'],request['task_id'])
+        request=next(e for e in reversed(read_trace(run_dir)) if e['node'] in ('generate','fix') and e['event']=='request')
+        key=(request['detail']['phase'],request['task_id'])
         if not replies[key]:
-            raise RuntimeError(f'No historical reply for round/task {key}; replay stops without contacting a model')
+            raise RuntimeError(f'No historical reply for phase/task {key}; replay stops without contacting a model')
         detail=replies[key].popleft()
-        choices=detail.get('choices')
-        if choices is None:
-            choices=[detail['raw']]  # Historical v1 traces.
-        return llm.Reply(choices[0],0,0,{'source':'recorded_reply','round':key[0],'task':key[1]},tuple(choices))
+        return llm.Reply(detail['response'],0,0,{'source':'recorded_reply','phase':key[0],'task':key[1]})
     argv=['run',str(args.source),'--run-id',args.run_id,'--output',args.output,
           '--retries',str(args.retries),'--repairs',str(args.repairs),
           '--frama-c',args.frama_c,'--analyzer-config',args.analyzer_config]

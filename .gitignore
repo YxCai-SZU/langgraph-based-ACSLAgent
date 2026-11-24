@@ -1,0 +1,34 @@
+# Local tool downloads, builds, caches and verification artifacts.
+/.tool/
+/.tools/
+/.frama-c*
+/runs*/
+/work/
+/outputs/
+/test/
+/tests/
+/build/
+/dist/
+/merged.c
+examples/**/SpecLoC.txt
+
+# Python environments and generated metadata.
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+.conda/
+
+# Credentials and local editor / Windows download metadata.
+.env
+.env.*
+*.pem
+*.key
+.vscode/
+.idea/
+.DS_Store
+*Zone.Identifier*
+*.identifier

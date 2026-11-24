@@ -1,2 +1,0 @@
-count===count.c:1===@3
-main===count.c:9===0

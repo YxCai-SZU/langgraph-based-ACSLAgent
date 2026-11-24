@@ -7,18 +7,23 @@ Run this once on every machine, from the project root:
 Inside WSL or Linux every command runs directly. Started from Windows Python,
 the same commands are forwarded through `wsl.exe -d <distribution>`.
 
-The script writes `.tools/native.json`. All paths in it are absolute Linux
-paths for *this* machine, so copying the file to another machine does not
-work; run the script again there instead.
+The script writes portable paths in `.tools/native.json`, relative to that
+file's directory. Existing runtime files are reused; copying the full folder
+does not require downloading LLVM again.
 """
 
 import argparse
 import hashlib
 import json
+import shutil
 import subprocess
 import sys
+import time
 import urllib.request
 from pathlib import Path
+
+
+MIRROR_PREFIX = "https://ghfast.top/"
 
 PROJECT = Path(__file__).resolve().parents[1]
 TOOLS = PROJECT / ".tools"
@@ -46,14 +51,47 @@ def write_json(path: Path, value: dict) -> None:
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+def usable(path: Path) -> bool:
+    return path.is_file() and path.stat().st_size > 0
+
+
+def repair_copied_links(llvm: Path, compat: Path) -> None:
+    """Windows copies may leave empty symlink placeholders; repair locally."""
+    clang = llvm/'bin/clang'
+    if not usable(clang):
+        if clang.is_symlink():
+            clang.unlink()
+        clang.write_text('#!/bin/sh\nexec "$(dirname "$0")/clang-12" "$@"\n',
+                         encoding='utf-8', newline='\n')
+    library = compat/'lib/x86_64-linux-gnu/libtinfo.so.5'
+    if not usable(library):
+        if library.is_symlink():
+            library.unlink()
+        shutil.copyfile(library.with_name('libtinfo.so.5.9'), library)
+
+
 def download(url: str, target: Path, expected: str) -> dict:
     if not target.exists():
         partial = target.with_suffix(".part")
         print(f"Downloading {target.name}", flush=True)
-        with urllib.request.urlopen(url, timeout=90) as source, partial.open("wb") as dest:
-            while block := source.read(4 * 1024 * 1024):
-                dest.write(block)
+        fetch_url = MIRROR_PREFIX + url if "github.com" in url else url
+
+        if shutil.which("aria2c"):
+            cmd = ["aria2c", "-c", "-x", "16", "-s", "16", "-k", "1M",
+                   "--file-allocation=none", "--console-log-level=warn",
+                   "-d", str(target.parent), "-o", partial.name, fetch_url]
+        else:
+            cmd = ["curl", "-C", "-", "-L", "--retry", "10", "--retry-delay", "3",
+                   "--connect-timeout", "20", "-o", str(partial), fetch_url]
+
+        while True:
+            result = subprocess.run(cmd)
+            if result.returncode == 0:
+                break
+            print("下载中断，3 秒后自动续传 ...", flush=True)
+            time.sleep(3)
         partial.replace(target)
+
     actual = sha256_file(target)
     if actual != expected:
         raise SystemExit(f"checksum mismatch for {target}; delete it and run again")
@@ -92,14 +130,14 @@ def main() -> None:
     for directory in (downloads, llvm, compat):
         directory.mkdir(parents=True, exist_ok=True)
 
-    archives = [
-        download(LLVM_URL, downloads / LLVM_NAME, LLVM_SHA256),
-        download(TINFO_URL, downloads / TINFO_NAME, TINFO_SHA256),
-    ]
+    archives = []
 
     # 1. clang 12 and its builtin headers, which veri-clang calls internally.
-    if not (llvm / "bin/clang-12").exists():
-        member_root = "clang+llvm-12.0.1-x86_64-linux-gnu-ubuntu-"
+    if not usable(llvm/'bin/clang-12') or not usable(llvm/'lib/clang/12.0.1/include/stddef.h'):
+        archives.append(download(LLVM_URL, downloads / LLVM_NAME, LLVM_SHA256))
+        member_root = shell.output(['python3', '-c',
+            'import sys,tarfile; t=tarfile.open(sys.argv[1], "r|xz"); print(next(iter(t)).name.split("/")[0])',
+            shell.path(downloads / LLVM_NAME)]).strip()
         print("Extracting clang 12 (one pass over the archive, takes a minute)", flush=True)
         shell.run([
             "tar", "-xJf", shell.path(downloads / LLVM_NAME),
@@ -108,14 +146,22 @@ def main() -> None:
         ])
 
     # 2. libtinfo.so.5, which clang 12 links against and new Ubuntu lacks.
-    shell.run(["dpkg-deb", "-x", shell.path(downloads / TINFO_NAME), shell.path(compat)])
+    if not usable(compat/'lib/x86_64-linux-gnu/libtinfo.so.5.9'):
+        archives.append(download(TINFO_URL, downloads / TINFO_NAME, TINFO_SHA256))
+        shell.run(["dpkg-deb", "-x", shell.path(downloads / TINFO_NAME), shell.path(compat)])
+    repair_copied_links(llvm, compat)
 
-    # 3. The vendored, unmodified original analyzer.
+    # 3. Preserve and verify the original analyzer; build a separate local fix.
     manifest = json.loads((PROJECT / "vendor/acslagent/manifest.json").read_text(encoding="utf-8-sig"))
     for entry in manifest["files"]:
         if sha256_file(PROJECT / entry["vendored_file"]) != entry["sha256"]:
             raise SystemExit(f"vendored file changed: {entry['vendored_file']}")
-    shell.run(["chmod", "+x", shell.path(VENDOR / "bin/veri-clang"), shell.path(llvm / "bin/clang-12")])
+    shell.run(["chmod", "+x", shell.path(VENDOR / "bin/veri-clang"),
+               shell.path(llvm / "bin/clang-12"), shell.path(llvm / "bin/clang")])
+    fixed = TOOLS/'veri-clang-fixed'
+    if not usable(fixed/'lib/veri-llvm-pass.so') and not usable(TOOLS/'llvm12-sdk/include/llvm/IR/Module.h'):
+        archives.append(download(LLVM_URL, downloads/LLVM_NAME, LLVM_SHA256))
+    shell.run(['python3', shell.path(PROJECT/'scripts/build_analyzer.py')])
 
     llvm_path = shell.path(llvm)
     library_path = shell.path(compat) + "/lib/x86_64-linux-gnu"
@@ -123,15 +169,15 @@ def main() -> None:
 
     config = {
         "distribution": args.distribution,
-        "compiler_directory": llvm_path + "/bin",
-        "analyzer_root": shell.path(VENDOR),
-        "library_path": library_path,
+        "compiler_directory": "llvm12/bin",
+        "analyzer_root": "veri-clang-fixed",
+        "library_path": "compat/lib/x86_64-linux-gnu",
         "timeout_seconds": 30,
         "compiler_version": version.strip(),
         "tool_sha256": {
             "clang-12": sha256_file(llvm / "bin/clang-12"),
-            "veri-clang": sha256_file(VENDOR / "bin/veri-clang"),
-            "veri-llvm-pass.so": sha256_file(VENDOR / "lib/veri-llvm-pass.so"),
+            "veri-clang": sha256_file(fixed / "bin/veri-clang"),
+            "veri-llvm-pass.so": sha256_file(fixed / "lib/veri-llvm-pass.so"),
         },
     }
     write_json(TOOLS / "native.json", config)
